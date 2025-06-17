@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: hobby-service
+  data:
+    mongodb:
+      # TODO: Add MongoDB configuration
+      host: localhost
+      port: 27017
+      database: hobbies
+
+server:
+  port: 8084
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,info
+  endpoint:
+    health:
+      show-details: always

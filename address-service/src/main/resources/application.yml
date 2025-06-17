@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: address-service
+  # TODO: Add database configuration
+  # TODO: Add service discovery configuration
+
+server:
+  port: 8082
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,info
+  endpoint:
+    health:
+      show-details: always

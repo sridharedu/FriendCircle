@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  # Infrastructure Services
+  discovery-service:
+    build: discovery-service
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  config-service:
+    build: config-service
+    ports:
+      - "8888:8888"
+    depends_on:
+      - discovery-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  gateway-service:
+    build: gateway-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - discovery-service
+      - config-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  # Core Services
+  user-service:
+    build: user-service
+    depends_on:
+      - discovery-service
+      - config-service
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  address-service:
+    build: address-service
+    depends_on:
+      - discovery-service
+      - config-service
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  friendship-service:
+    build: friendship-service
+    depends_on:
+      - discovery-service
+      - config-service
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  hobby-service:
+    build: hobby-service
+    depends_on:
+      - discovery-service
+      - config-service
+      - mongodb
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  message-service:
+    build: message-service
+    depends_on:
+      - discovery-service
+      - config-service
+      - kafka
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  notification-service:
+    build: notification-service
+    depends_on:
+      - discovery-service
+      - config-service
+      - kafka
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  # Databases
+  postgres:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_USER=friendcircle
+      - POSTGRES_PASSWORD=friendcircle
+      - POSTGRES_DB=friendcircle
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mongodb:
+    image: mongo:5
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  # Message Broker
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+volumes:
+  postgres_data:
+  mongodb_data:

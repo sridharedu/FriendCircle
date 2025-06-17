@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: friendship-service
+  # TODO: Add database configuration
+  # TODO: Add service discovery configuration
+
+server:
+  port: 8083
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,info
+  endpoint:
+    health:
+      show-details: always

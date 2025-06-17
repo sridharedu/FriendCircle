@@ -1,3 +1,0 @@
-# docker-compose.yml: Orchestrates FriendCircle services for local development.
-# Services (PostgreSQL, MongoDB, Kafka, ELK, Prometheus, Grafana, Zipkin, etc.)
-# and application microservices will be defined here.
